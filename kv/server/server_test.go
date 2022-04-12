@@ -8,6 +8,7 @@ import (
 	"github.com/pingcap-incubator/tinykv/kv/storage"
 	"github.com/pingcap-incubator/tinykv/kv/storage/standalone_storage"
 	"github.com/pingcap-incubator/tinykv/kv/util/engine_util"
+	"github.com/pingcap-incubator/tinykv/log"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/kvrpcpb"
 	"github.com/stretchr/testify/assert"
 )
@@ -99,9 +100,7 @@ func TestRawPut1(t *testing.T) {
 		Value: []byte{42},
 		Cf:    cf,
 	}
-
 	_, err := server.RawPut(nil, req)
-
 	got, err := Get(s, cf, []byte{99})
 	assert.Nil(t, err)
 	assert.Equal(t, []byte{42}, got)
@@ -224,7 +223,7 @@ func TestRawScan1(t *testing.T) {
 
 	resp, err := server.RawScan(nil, req)
 	assert.Nil(t, err)
-
+	log.Info(resp.Kvs)
 	assert.Equal(t, 3, len(resp.Kvs))
 	expectedKeys := [][]byte{{1}, {2}, {3}}
 	for i, kv := range resp.Kvs {
@@ -263,7 +262,6 @@ func TestRawScanAfterRawPut1(t *testing.T) {
 
 	_, err := server.RawPut(nil, put)
 	assert.Nil(t, err)
-
 	resp, err := server.RawScan(nil, scan)
 	assert.Nil(t, err)
 	assert.Equal(t, len(expectedKeys), len(resp.Kvs))
